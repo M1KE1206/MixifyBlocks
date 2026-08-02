@@ -12,6 +12,7 @@
 		"issues": "https://github.com/M1KE1206/MixifyBlocks/issues"
 	},
 	"license": "MIT",
+	"icon": "assets/mixifyblocks/icon.png",
 	"environment": "client",
 	"entrypoints": {
 		"client": [
