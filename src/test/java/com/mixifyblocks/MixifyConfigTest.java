@@ -107,4 +107,14 @@ class MixifyConfigTest {
 		assertEquals(1, loaded.minSlot);
 		assertEquals(9, loaded.maxSlot);
 	}
+
+	@Test
+	void configZonderMaxSameInRowKrijgtDeStandaardwaarde(@TempDir Path dir) throws IOException {
+		// Een configbestand van vóór deze functie kent de sleutel niet; de mod moet dan
+		// op 3 uitkomen en niet op 0, want 0 zou bij elke plaatsing een ander blok forceren.
+		Path path = dir.resolve("mixifyblocks.json");
+		Files.writeString(path, "{\"minSlot\": 2, \"maxSlot\": 5}");
+		MixifyConfig loaded = MixifyConfig.load(path);
+		assertEquals(3, loaded.maxSameInRow);
+	}
 }
