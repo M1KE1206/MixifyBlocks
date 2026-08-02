@@ -72,9 +72,11 @@ public class MixifyBlocks implements ClientModInitializer {
 			announce(client);
 		}
 
-		if (enabled && switchPending) {
+		if (switchPending) {
 			switchPending = false;
-			performSwitch(client);
+			if (enabled) {
+				performSwitch(client);
+			}
 		}
 	}
 
