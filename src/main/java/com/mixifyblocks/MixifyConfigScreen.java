@@ -38,6 +38,13 @@ public final class MixifyConfigScreen {
 				.build());
 
 		general.addEntry(entries
+				.startIntSlider(Component.translatable("option.mixifyblocks.max_same_in_row"), config.maxSameInRow, 1, 9)
+				.setDefaultValue(3)
+				.setTooltip(Component.translatable("tooltip.mixifyblocks.max_same_in_row"))
+				.setSaveConsumer(value -> config.maxSameInRow = value)
+				.build());
+
+		general.addEntry(entries
 				.startBooleanToggle(Component.translatable("option.mixifyblocks.enabled_on_join"), config.enabledOnJoin)
 				.setDefaultValue(false)
 				.setTooltip(Component.translatable("tooltip.mixifyblocks.enabled_on_join"))

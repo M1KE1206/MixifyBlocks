@@ -96,6 +96,10 @@ Press **N** again to turn it off.
 - Mixing only kicks in while your selected slot is **inside** your configured range. Scroll to
   slot 8 with a range of 1 to 4 and the mod stays out of your way.
 - Works with right-click held down, so placing a whole row mixes as you go.
+- The same block type won't repeat more than a configurable number of times in a row (default
+  3, counted by block type - the same block in two different slots still shares one streak). If
+  the limit is hit but no other block type is in range, it repeats anyway rather than getting
+  stuck.
 - Opening a chest or a door while holding a block does **not** trigger a switch.
 - Only main-hand placements count. Placing from your offhand leaves your hotbar alone.
 - Works in survival and creative. When a stack runs out in survival, that slot simply drops
@@ -111,6 +115,7 @@ screen overwrites them.
 |---|---|---|
 | Lowest slot | 1 | First hotbar slot that takes part |
 | Highest slot | 9 | Last hotbar slot that takes part |
+| Max identical blocks in a row | 3 | How many identical blocks may be placed in a row before a different block type is forced. Set to 1 to never repeat |
 | Enabled on join | off | Turn mixing on automatically when you join a world |
 | Show action bar message | on | Short message above your hotbar when you toggle |
 

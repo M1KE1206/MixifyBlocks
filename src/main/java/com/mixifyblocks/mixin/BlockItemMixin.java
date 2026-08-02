@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,7 +37,7 @@ public class BlockItemMixin {
 
 		InteractionResult result = cir.getReturnValue();
 		if (result != null && result.consumesAction()) {
-			MixifyBlocks.requestSwitch();
+			MixifyBlocks.requestSwitch((Item) (Object) this);
 		}
 	}
 }

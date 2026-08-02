@@ -12,6 +12,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ public class MixifyBlocks implements ClientModInitializer {
 
 	private static MixifyConfig config = new MixifyConfig();
 	private static KeyMapping toggleKey;
+	private static final PlacementStreak STREAK = new PlacementStreak();
 
 	/** Sessie-status: staat het mengen aan? Wordt niet opgeslagen. */
 	private static boolean enabled;
@@ -37,7 +39,7 @@ public class MixifyBlocks implements ClientModInitializer {
 	 * Bewust een boolean en geen teller: {@code Minecraft.handleKeybinds()} verwerkt
 	 * gebufferde rechtermuisklikken in een onbegrensde while-lus binnen dezelfde tick, dus
 	 * meerdere plaatsingen in één tick smelten samen tot één wissel. Dat is geaccepteerd
-	 * gedrag, geen bug. Eager wisselen binnen {@link #requestSwitch()} zou erger zijn:
+	 * gedrag, geen bug. Eager wisselen binnen {@link #requestSwitch(Item)} zou erger zijn:
 	 * {@code Minecraft.startUseItem()} leest het vastgehouden item opnieuw uit nadat
 	 * {@code useItemOn} teruggekeerd is, dus het slot midden in de interactie muteren
 	 * riskeert plaatsen vanuit het nieuwe slot.
@@ -55,10 +57,12 @@ public class MixifyBlocks implements ClientModInitializer {
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
 			enabled = config.enabledOnJoin;
 			switchPending = false;
+			STREAK.reset();
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			enabled = false;
 			switchPending = false;
+			STREAK.reset();
 		});
 
 		ClientTickEvents.END_CLIENT_TICK.register(MixifyBlocks::onEndClientTick);
@@ -69,6 +73,7 @@ public class MixifyBlocks implements ClientModInitializer {
 	private static void onEndClientTick(Minecraft client) {
 		while (toggleKey.consumeClick()) {
 			enabled = !enabled;
+			STREAK.reset();
 			announce(client);
 		}
 
@@ -83,12 +88,15 @@ public class MixifyBlocks implements ClientModInitializer {
 	/**
 	 * Meldt dat er zojuist een block geplaatst is. De wissel zelf gebeurt pas aan het eind
 	 * van dezelfde client-tick, zodat de inventory niet gemuteerd wordt terwijl de interactie
-	 * nog afgehandeld wordt.
+	 * nog afgehandeld wordt. {@code placedItem} voedt de {@link PlacementStreak}, zodat die
+	 * op bloktype kan tellen ongeacht welk slot het lag.
 	 */
-	public static void requestSwitch() {
-		if (enabled) {
-			switchPending = true;
+	public static void requestSwitch(Item placedItem) {
+		if (!enabled) {
+			return;
 		}
+		STREAK.record(placedItem);
+		switchPending = true;
 	}
 
 	private static void performSwitch(Minecraft client) {
@@ -103,8 +111,21 @@ public class MixifyBlocks implements ClientModInitializer {
 			hasBlock[i] = inventory.getItem(i).getItem() instanceof BlockItem;
 		}
 
-		int chosen = SlotPicker.pick(hasBlock, config.minIndex(), config.maxIndex(),
+		boolean[] candidates = hasBlock;
+		if (STREAK.limitReached(config.maxSameInRow)) {
+			candidates = new boolean[hasBlock.length];
+			for (int i = 0; i < candidates.length; i++) {
+				candidates[i] = hasBlock[i] && inventory.getItem(i).getItem() != STREAK.lastItem();
+			}
+		}
+
+		int chosen = SlotPicker.pick(candidates, config.minIndex(), config.maxIndex(),
 				inventory.getSelectedSlot(), RANDOM);
+		if (chosen == SlotPicker.NO_CHOICE && candidates != hasBlock) {
+			// Alleen dit bloktype beschikbaar: liever herhalen dan helemaal niet wisselen.
+			chosen = SlotPicker.pick(hasBlock, config.minIndex(), config.maxIndex(),
+					inventory.getSelectedSlot(), RANDOM);
+		}
 		if (chosen != SlotPicker.NO_CHOICE) {
 			// Vanilla stuurt de wijziging vanzelf naar de server via ensureHasSentCarriedItem().
 			inventory.setSelectedSlot(chosen);

@@ -28,6 +28,7 @@ public class MixifyConfig {
 	public int maxSlot = LAST_SLOT;
 	public boolean enabledOnJoin = false;
 	public boolean showActionbar = true;
+	public int maxSameInRow = 3;
 
 	/** Klemt beide grenzen op 1-9 en wisselt ze om als ze omgekeerd staan. */
 	public void normalize() {
@@ -38,6 +39,7 @@ public class MixifyConfig {
 			minSlot = maxSlot;
 			maxSlot = swap;
 		}
+		maxSameInRow = clamp(maxSameInRow);
 	}
 
 	private static int clamp(int slot) {

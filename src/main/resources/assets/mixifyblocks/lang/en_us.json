@@ -9,6 +9,8 @@
 	"tooltip.mixifyblocks.min_slot": "First hotbar slot that takes part in the mixing.",
 	"option.mixifyblocks.max_slot": "Highest slot",
 	"tooltip.mixifyblocks.max_slot": "Last hotbar slot that takes part in the mixing. If this is lower than the first slot, the two are swapped automatically.",
+	"option.mixifyblocks.max_same_in_row": "Max identical blocks in a row",
+	"tooltip.mixifyblocks.max_same_in_row": "How many identical blocks may be placed in a row before the mod forces a different one. Set to 1 to never place the same block twice in a row. If no other block is available in your range, it repeats anyway.",
 	"option.mixifyblocks.enabled_on_join": "Enabled on join",
 	"tooltip.mixifyblocks.enabled_on_join": "Turn mixing on automatically when you join a world or server.",
 	"option.mixifyblocks.show_actionbar": "Show action bar message",

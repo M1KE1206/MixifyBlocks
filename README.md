@@ -9,7 +9,7 @@ MixifyBlocks is a client-side Fabric mod for Minecraft 1.21.7. Toggle it on, and
 - Only slots within your configured range are considered, and only slots that actually hold a block item - empty slots, tools, food, and weapons are never selected.
 - Mixing only does anything while your currently selected slot is inside the configured range. If you switch to a slot outside the range, placing blocks there is left alone.
 - Only main-hand placements trigger a switch; placing a block from the offhand does not.
-- The same slot can be picked twice in a row - there's no memory of what was picked last.
+- The same block type won't be picked more than a configurable number of times in a row (default 3, counted by block type - not by slot, so the same block sitting in two different slots still counts as one streak). If the limit is reached but no other block type is in range, the mod repeats it anyway rather than freezing.
 - Interacting with blocks that aren't placements (opening a chest, a door, etc.) never triggers a switch, even while holding a block.
 
 The mod works in both survival and creative, in single-player and on any server, since it only touches your local hotbar selection. It is entirely client-side: nobody else needs it installed, and you don't need it on a server to play there.
@@ -22,6 +22,7 @@ ModMenu is optional. If it's installed, configure MixifyBlocks through it (click
 | --- | --- | --- |
 | `minSlot` | `1` | Lowest hotbar slot (1-9) included in the mixing range. |
 | `maxSlot` | `9` | Highest hotbar slot (1-9) included in the mixing range. |
+| `maxSameInRow` | `3` | Maximum number of identical blocks (1-9) allowed in a row before the mod forces a different block type. `1` means never the same block twice in a row. |
 | `enabledOnJoin` | `false` | Whether mixing starts turned on when you join a world. |
 | `showActionbar` | `true` | Whether toggling mixing shows an action bar message. |
 

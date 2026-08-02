@@ -51,11 +51,26 @@ die een plaatsbaar block bevatten.
 | Huidig slot ligt buiten het bereik | Geen switch. De mod doet niets. |
 | Geen enkel slot in het bereik bevat een block | Geen switch, geen foutmelding. |
 | Precies één slot in het bereik bevat een block | Blijft op dat slot staan. |
-| Het gekozen slot is hetzelfde als het huidige | Toegestaan. De keuze is puur willekeurig, herhaling mag. |
+| Het gekozen slot is hetzelfde als het huidige | Toegestaan, zolang het bloktype niet de `maxSameInRow`-limiet overschrijdt. De keuze binnen de overgebleven kandidaten is puur willekeurig. |
 | Slot bevat een item dat geen block is (zwaard, eten, tool) | Telt niet mee als kandidaat. |
 | Speler plaatst een block terwijl de modus UIT staat | Geen switch. |
+| De `maxSameInRow`-limiet is bereikt maar er is geen ander bloktype in het bereik | Val terug op de gewone keuze inclusief het net geplaatste bloktype. De mod mag nooit vastlopen of stoppen met wisselen. |
+| Speler zet de modus uit en weer aan | De plaatsingsteller begint opnieuw. |
+| Speler verlaat de wereld of server | De plaatsingsteller begint opnieuw. |
+| Speler plaatst een ander bloktype dan de vorige plaatsing | De teller springt terug naar 1 voor dat nieuwe type. |
 
 "Plaatsbaar block" = de `ItemStack` in het slot is een `BlockItem`.
+
+### Limiet op herhaling (`maxSameInRow`)
+
+Er mogen niet meer dan `maxSameInRow` **identieke blokken** achter elkaar geplaatst worden.
+Er wordt geteld op **bloktype**, niet op slotnummer: ligt stone in slot 1 én in slot 3, dan
+tellen die plaatsingen samen voor de teller — anders zou je alsnog `maxSameInRow` keer zoveel
+dezelfde blokken op een rij kunnen krijgen door tussen twee slots met hetzelfde bloktype te
+wisselen. Zodra de limiet bereikt is, kiest de mod een slot met een ander bloktype uit dezelfde
+`[minSlot, maxSlot]`-range. Is er geen ander bloktype beschikbaar, dan valt de mod terug op de
+gewone (ongefilterde) keuze, zodat hij nooit stopt met wisselen puur omdat er maar één
+bloktype binnen bereik ligt.
 
 ### Timing
 
@@ -85,6 +100,7 @@ Beheerd via Cloth Config, bereikbaar via ModMenu. Opgeslagen als JSON in
 |---|---|---|---|---|
 | `minSlot` | int slider | 1 | 1-9 | Laagste hotbar-slot dat meedoet |
 | `maxSlot` | int slider | 9 | 1-9 | Hoogste hotbar-slot dat meedoet |
+| `maxSameInRow` | int slider | 3 | 1-9 | Max. aantal identieke blokken (zelfde bloktype) op rij, geteld ongeacht slot |
 | `enabledOnJoin` | boolean | false | — | Modus automatisch AAN bij het starten van een wereld |
 | `showActionbar` | boolean | true | — | Actionbar-melding tonen bij schakelen |
 
@@ -94,9 +110,10 @@ Intern wordt gerekend met 0-gebaseerde indexen; de conversie gebeurt op één pl
 ### Normalisatie
 
 Als `minSlot > maxSlot` worden de twee waarden bij het laden en bij het opslaan omgewisseld.
-Beide waarden worden geklemd op 1-9. Een handmatig bewerkt of beschadigd configbestand kan
-de mod dus niet in een kapotte toestand brengen; bij een onleesbaar bestand vallen alle
-waarden terug op hun standaardwaarde.
+Beide waarden worden geklemd op 1-9. `maxSameInRow` wordt los daarvan ook op 1-9 geklemd, maar
+doet niet mee aan de min/max-omwisseling — die geldt alleen voor `minSlot` en `maxSlot`. Een
+handmatig bewerkt of beschadigd configbestand kan de mod dus niet in een kapotte toestand
+brengen; bij een onleesbaar bestand vallen alle waarden terug op hun standaardwaarde.
 
 ## Structuur
 
@@ -107,10 +124,12 @@ src/main/java/com/mixifyblocks/
   MixifyConfigScreen.java     opbouw van het Cloth Config-scherm
   ModMenuIntegration.java     ModMenuApi: koppelt de knop in ModMenu aan het scherm
   SlotPicker.java             kiest een willekeurig block-slot binnen een bereik
+  PlacementStreak.java        telt hoe vaak hetzelfde bloktype achter elkaar geplaatst is
   mixin/BlockItemMixin.java   detecteert een geslaagde block-plaatsing
 src/test/java/com/mixifyblocks/
   SlotPickerTest.java
   MixifyConfigTest.java
+  PlacementStreakTest.java
 ```
 
 Alles staat in één source set. De mod is client-only via `"environment": "client"` in
@@ -127,10 +146,20 @@ werken in plaats van met `ItemStack`s heeft deze klasse geen enkele Minecraft-im
 hij met gewone JUnit te testen zonder het spel te bootstrappen. Bevat alle randgevallen uit
 de tabel hierboven.
 
+**`PlacementStreak`** — Telt hoe vaak achter elkaar hetzelfde bloktype geplaatst is. Vergelijkt
+op identiteit (`==`) op een kale `Object`, dus zonder Minecraft-imports, en is daardoor met
+gewone JUnit te testen zonder het spel te bootstrappen. `record(Object)` registreert een
+plaatsing en zet de teller terug op 1 zodra het item verschilt van de vorige; `limitReached(int)`
+zegt of de ingestelde `maxSameInRow` bereikt is; `reset()` wist de teller volledig. `MixifyBlocks`
+roept `reset()` aan bij het joinen van een wereld, bij het verlaten ervan en bij het schakelen
+van de toggle (in beide richtingen), zodat een nieuwe sessie of een nieuwe build altijd met een
+schone lei begint.
+
 **`BlockItemMixin`** — `@Inject` op `RETURN` van `BlockItem.place(BlockPlaceContext)`.
 Controleert dat het om de client-kant gaat, dat de speler de lokale speler is, dat de
-hoofdhand gebruikt is en dat het `InteractionResult` een geslaagde actie is; zo ja, zet de
-vlag op `MixifyBlocks`. Doet verder geen logica.
+hoofdhand gebruikt is en dat het `InteractionResult` een geslaagde actie is; zo ja, geeft hij
+`this` (het geplaatste `BlockItem`, gegoten naar `Item`) door aan
+`MixifyBlocks.requestSwitch(Item)`. Doet verder geen logica.
 
 `BlockItem.place` is gekozen boven `MultiPlayerGameMode.useItemOn`, omdat die laatste ook
 `SUCCESS` teruggeeft wanneer je met een block in je hand een kist of deur opent. Dat zou een
@@ -191,7 +220,18 @@ bestaande ToggleEnch-mod.
 - Geeft "geen keuze" wanneer het huidige slot buiten het bereik ligt
 
 **Unit-tests op `MixifyConfig`**: omgewisselde min/max wordt genormaliseerd, waarden buiten
-1-9 worden geklemd, een onleesbaar bestand valt terug op de standaardwaarden.
+1-9 worden geklemd (inclusief `maxSameInRow`), een onleesbaar bestand valt terug op de
+standaardwaarden, opslaan-en-laden behoudt ook `maxSameInRow`.
+
+**Unit-tests op `PlacementStreak`**, zonder draaiend spel:
+
+- Een verse teller heeft de limiet niet bereikt.
+- Eén plaatsing bereikt de limiet niet bij een limiet van 3; drie identieke plaatsingen wel,
+  twee niet.
+- Een ander item laat de telling opnieuw beginnen, ook na het bereiken van de limiet.
+- Bij een limiet van 1 is de limiet al na één plaatsing bereikt.
+- `reset()` zet de telling terug en `lastItem()` weer op null.
+- `lastItem()` geeft het laatst geregistreerde item terug.
 
 **Handmatige verificatie in het spel** (survival én creative): keybind schakelt, actionbar
 verschijnt, bouwen binnen het bereik mengt de blokken, bouwen buiten het bereik verandert

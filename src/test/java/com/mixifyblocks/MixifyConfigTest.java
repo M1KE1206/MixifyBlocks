@@ -20,6 +20,7 @@ class MixifyConfigTest {
 		assertEquals(9, config.maxSlot);
 		assertFalse(config.enabledOnJoin);
 		assertTrue(config.showActionbar);
+		assertEquals(3, config.maxSameInRow);
 	}
 
 	@Test
@@ -52,6 +53,18 @@ class MixifyConfigTest {
 	}
 
 	@Test
+	void maxSameInRowBuitenBereikWordtGeklemd() {
+		MixifyConfig config = new MixifyConfig();
+		config.maxSameInRow = 0;
+		config.normalize();
+		assertEquals(1, config.maxSameInRow);
+
+		config.maxSameInRow = 50;
+		config.normalize();
+		assertEquals(9, config.maxSameInRow);
+	}
+
+	@Test
 	void opslaanEnLadenBehoudtWaarden(@TempDir Path dir) {
 		Path path = dir.resolve("mixifyblocks.json");
 		MixifyConfig config = new MixifyConfig();
@@ -59,6 +72,7 @@ class MixifyConfigTest {
 		config.maxSlot = 6;
 		config.enabledOnJoin = true;
 		config.showActionbar = false;
+		config.maxSameInRow = 5;
 		config.save(path);
 
 		MixifyConfig loaded = MixifyConfig.load(path);
@@ -66,6 +80,7 @@ class MixifyConfigTest {
 		assertEquals(6, loaded.maxSlot);
 		assertTrue(loaded.enabledOnJoin);
 		assertFalse(loaded.showActionbar);
+		assertEquals(5, loaded.maxSameInRow);
 	}
 
 	@Test
