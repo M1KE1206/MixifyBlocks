@@ -2,5 +2,15 @@
 	"key.categories.mixifyblocks": "MixifyBlocks",
 	"key.mixifyblocks.toggle": "Toggle block mixing",
 	"text.mixifyblocks.enabled": "MixifyBlocks: ON (slots %s-%s)",
-	"text.mixifyblocks.disabled": "MixifyBlocks: OFF"
+	"text.mixifyblocks.disabled": "MixifyBlocks: OFF",
+	"title.mixifyblocks.config": "MixifyBlocks",
+	"category.mixifyblocks.general": "General",
+	"option.mixifyblocks.min_slot": "Lowest slot",
+	"tooltip.mixifyblocks.min_slot": "First hotbar slot that takes part in the mixing.",
+	"option.mixifyblocks.max_slot": "Highest slot",
+	"tooltip.mixifyblocks.max_slot": "Last hotbar slot that takes part in the mixing. If this is lower than the first slot, the two are swapped automatically.",
+	"option.mixifyblocks.enabled_on_join": "Enabled on join",
+	"tooltip.mixifyblocks.enabled_on_join": "Turn mixing on automatically when you join a world or server.",
+	"option.mixifyblocks.show_actionbar": "Show action bar message",
+	"tooltip.mixifyblocks.show_actionbar": "Show a short message above your hotbar when you toggle mixing."
 }
