@@ -100,34 +100,47 @@ waarden terug op hun standaardwaarde.
 ## Structuur
 
 ```
-src/client/java/com/mixifyblocks/client/
-  MixifyBlocksClient.java     ClientModInitializer: keybind, tick-handler, toggle-status
+src/main/java/com/mixifyblocks/
+  MixifyBlocks.java           ClientModInitializer: keybind, tick-handler, toggle-status
   MixifyConfig.java           velden, laden/opslaan, normalisatie
   MixifyConfigScreen.java     opbouw van het Cloth Config-scherm
   ModMenuIntegration.java     ModMenuApi: koppelt de knop in ModMenu aan het scherm
   SlotPicker.java             kiest een willekeurig block-slot binnen een bereik
-  mixin/MultiPlayerGameModeMixin.java   detecteert een geslaagde block-plaatsing
+  mixin/BlockItemMixin.java   detecteert een geslaagde block-plaatsing
+src/test/java/com/mixifyblocks/
+  SlotPickerTest.java
+  MixifyConfigTest.java
 ```
 
-Er is geen `src/main` gameplay-code nodig; de mod is `client`-only in `fabric.mod.json`.
+Alles staat in één source set. De mod is client-only via `"environment": "client"` in
+`fabric.mod.json`, niet via een aparte `src/client`-source set. Dat is bewust: met
+`splitEnvironmentSourceSets()` zou `src/test` de mod-klassen niet op zijn classpath krijgen,
+en dan zijn `SlotPicker` en `MixifyConfig` niet met gewone JUnit te testen.
 
 ### Verantwoordelijkheden
 
-**`SlotPicker`** — Kernlogica, losgekoppeld van Minecraft-lifecycle. Krijgt de negen
-hotbar-`ItemStack`s, het bereik, het huidige slot en een `RandomSource`; geeft het gekozen
-slot terug of "geen keuze". Bevat alle randgevallen uit de tabel hierboven en is daardoor
-apart te testen zonder draaiend spel.
+**`SlotPicker`** — Kernlogica, volledig losgekoppeld van Minecraft. Krijgt een `boolean[]` van
+negen ("bevat dit slot een block?"), het bereik, het huidige slot en een `RandomGenerator`;
+geeft de gekozen 0-gebaseerde slotindex terug of `NO_CHOICE`. Door met een `boolean[]` te
+werken in plaats van met `ItemStack`s heeft deze klasse geen enkele Minecraft-import, en is
+hij met gewone JUnit te testen zonder het spel te bootstrappen. Bevat alle randgevallen uit
+de tabel hierboven.
 
-**`MultiPlayerGameModeMixin`** — `@Inject` op `RETURN` van
-`MultiPlayerGameMode.useItemOn(...)`. Controleert of het `InteractionResult` een geslaagde
-actie is, of de hand de hoofdhand was, en of de gebruikte stack een `BlockItem` was; zo ja,
-zet de vlag op `MixifyBlocksClient`. Doet verder geen logica.
+**`BlockItemMixin`** — `@Inject` op `RETURN` van `BlockItem.place(BlockPlaceContext)`.
+Controleert dat het om de client-kant gaat, dat de speler de lokale speler is, dat de
+hoofdhand gebruikt is en dat het `InteractionResult` een geslaagde actie is; zo ja, zet de
+vlag op `MixifyBlocks`. Doet verder geen logica.
 
-De exacte signatuur van `useItemOn` en de manier waarop een geslaagd `InteractionResult`
-wordt herkend moeten bij aanvang van de implementatie geverifieerd worden tegen de
-gedecompileerde 1.21.7-bronnen. `InteractionResult` is in 1.21.2 omgebouwd van een enum naar
-een sealed interface, dus oudere voorbeelden op internet kloppen niet meer. Dit is de enige
-plek in de mod die van interne Minecraft-API afhangt.
+`BlockItem.place` is gekozen boven `MultiPlayerGameMode.useItemOn`, omdat die laatste ook
+`SUCCESS` teruggeeft wanneer je met een block in je hand een kist of deur opent. Dat zou een
+ongewenste wissel opleveren. `place` wordt alleen aangeroepen als er daadwerkelijk een block
+geplaatst wordt.
+
+Deze signaturen zijn geverifieerd tegen de gedecompileerde 1.21.7-jar:
+`BlockItem.place(BlockPlaceContext)` geeft `InteractionResult` terug, en `InteractionResult`
+is sinds 1.21.2 geen enum meer maar een interface met een default-methode `consumesAction()`.
+Voorbeelden van vóór 1.21.2 die je online vindt kloppen dus niet meer. Dit is de enige plek
+in de mod die van interne Minecraft-API afhangt.
 
 **`MixifyBlocksClient`** — Registreert de keybind, luistert op `END_CLIENT_TICK`, handelt de
 toggle af en voert de uitgestelde switch uit door `SlotPicker` te raadplegen.
