@@ -2,7 +2,9 @@
 	"required": true,
 	"package": "com.mixifyblocks.mixin",
 	"compatibilityLevel": "JAVA_21",
-	"client": [],
+	"client": [
+		"BlockItemMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	}
