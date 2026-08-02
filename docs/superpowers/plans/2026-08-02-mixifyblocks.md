@@ -304,8 +304,11 @@ class SlotPickerTest {
 
 	@Test
 	void kiestAlleenSlotsBinnenHetBereik() {
+		// De generator staat buiten de lus, anders trekt elke iteratie dezelfde waarde
+		// uit een verse seed en test de lus 200 keer exact hetzelfde geval.
+		RandomGenerator random = seeded();
 		for (int i = 0; i < 200; i++) {
-			int chosen = SlotPicker.pick(allBlocks(), 0, 3, 2, seeded());
+			int chosen = SlotPicker.pick(allBlocks(), 0, 3, 2, random);
 			assertTrue(chosen >= 0 && chosen <= 3, "slot buiten bereik: " + chosen);
 		}
 	}
