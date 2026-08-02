@@ -57,7 +57,20 @@ elke server gebruiken, ook op servers waar de mod niet geïnstalleerd is.
 ## Loaders / Game versions
 
 - Loader: Fabric
-- Game version: 1.21.7
+- Game versions: **1.21.7** en **1.21.8** — verder niets aanvinken
+
+Vink 1.21.9, 1.21.10 of 1.21.11 **niet** aan. Die versies vereisen Cloth Config 20.x of 21.x,
+en deze mod is gebouwd tegen 19.x. Cloth ging daar twee keer een major-versie omhoog, wat
+betekent dat de API gebroken is. Vink je ze toch aan, dan downloaden spelers een jar die bij
+het opstarten crasht.
+
+1.21.7 is de versie waarop getest is. 1.21.8 gebruikt exact dezelfde Cloth Config- en
+ModMenu-builds en is een patch-release, dus vrijwel zeker in orde — start hem één keer op om
+het zeker te weten voordat je het aanvinkt.
+
+Wil je 1.21.9 en hoger ondersteunen, dan is dat een aparte build: `minecraft_version` en
+`cloth_config_version` in `gradle.properties` ophogen, opnieuw compileren, en de mixin
+opnieuw controleren tegen de nieuwe mappings.
 
 ## Links
 

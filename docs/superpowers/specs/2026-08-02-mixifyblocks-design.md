@@ -191,7 +191,7 @@ die in creative niet werkt (blocks worden daar niet verbruikt).
 
 | Mod | Versie | Rol |
 |---|---|---|
-| Minecraft | 1.21.7 | — |
+| Minecraft | 1.21.7 (build) / 1.21.7-1.21.8 (toegestaan) | — |
 | Fabric Loader | 0.19.3 | — |
 | Fabric API | 0.129.0+1.21.7 | keybind-registratie, client-tick-events |
 | Cloth Config | `me.shedaniel.cloth:cloth-config-fabric:19.0.147` | configscherm |
@@ -203,6 +203,32 @@ ModMenu staat als `recommends`, niet als `depends`: de mod is volledig bruikbaar
 (keybind plus het configbestand rechtstreeks bewerken), en het spel mag niet weigeren te
 starten voor spelers die ModMenu niet willen. Zonder ModMenu ontbreekt alleen de ingang naar
 het configscherm.
+
+### Ondersteunde Minecraft-versies
+
+`fabric.mod.json` staat uitsluitend `1.21.7` en `1.21.8` toe, en klemt Cloth Config op `^19.0.0`
+en ModMenu op `^15.0.0`. Dat is bewust strak:
+
+| Minecraft | Vereist Cloth Config |
+|---|---|
+| 1.21.6 – 1.21.8 | 19.0.147 |
+| 1.21.9 – 1.21.10 | 20.0.149 |
+| 1.21.11 | 21.11.153 |
+
+Cloth Config ging twee keer een major-versie omhoog, dus de API is gebroken voor 1.21.9 en
+hoger. Een lossere range als `~1.21.7` zou de mod op 1.21.11 laten laden en daar crashen op een
+mixin- of NoSuchMethodError; met deze pinning weigert Fabric hem netjes te laden en ziet de
+speler waarom.
+
+Ondersteuning voor 1.21.9 en hoger is een aparte build: `minecraft_version` en
+`cloth_config_version` ophogen, hercompileren, en de mixin-descriptor opnieuw verifiëren tegen
+de nieuwe mappings.
+
+De operators `^` (`SAME_TO_NEXT_MAJOR`) en `~` (`SAME_TO_NEXT_MINOR`) zijn geverifieerd in
+`VersionComparisonOperator` van fabric-loader 0.19.3. Voor `minecraft` is bewust een array van
+exacte versies gebruikt in plaats van een samengestelde range: een array is een OR van losse
+predicates, wat geen ruimte laat voor twijfel over hoe Fabric een string met meerdere termen
+parseert.
 
 Build: Java 21, Gradle met `fabric-loom-remap`, `officialMojangMappings()` — gelijk aan de
 bestaande ToggleEnch-mod.

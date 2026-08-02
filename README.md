@@ -32,11 +32,16 @@ The config file is only read once, at startup. If you hand-edit it while the gam
 
 ## Requirements
 
-- Minecraft 1.21.7
+- Minecraft 1.21.7 or 1.21.8
 - Fabric Loader 0.19.3 or newer
 - Fabric API
-- Cloth Config 19.0.147 or newer (required - provides the config screen)
-- Mod Menu 15.0.2 or newer (optional - provides an in-game settings screen; without it, edit the config file directly)
+- Cloth Config 19.x (required - provides the config screen)
+- Mod Menu 15.x (optional - provides an in-game settings screen; without it, edit the config file directly)
+
+Minecraft 1.21.9 and later are not supported. Those versions need Cloth Config 20.x or 21.x,
+whose API is not compatible with the 19.x this mod is built against. The manifest pins the
+supported range so the game refuses to load the mod on an unsupported version instead of
+crashing on a mixin error.
 - Java 21
 
 ## Building from source
