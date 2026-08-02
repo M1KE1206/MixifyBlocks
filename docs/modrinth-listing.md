@@ -97,12 +97,15 @@ Press **N** again to turn it off.
   slot 8 with a range of 1 to 4 and the mod stays out of your way.
 - Works with right-click held down, so placing a whole row mixes as you go.
 - Opening a chest or a door while holding a block does **not** trigger a switch.
+- Only main-hand placements count. Placing from your offhand leaves your hotbar alone.
 - Works in survival and creative. When a stack runs out in survival, that slot simply drops
   out of the rotation.
 
 ## Configuration
 
-Configure it through Mod Menu, or edit `config/mixifyblocks.json`.
+Configure it through Mod Menu, or edit `config/mixifyblocks.json` directly. The file is read
+once at startup, so hand edits take effect after a restart, and a later save from the settings
+screen overwrites them.
 
 | Setting | Default | What it does |
 |---|---|---|
@@ -110,6 +113,9 @@ Configure it through Mod Menu, or edit `config/mixifyblocks.json`.
 | Highest slot | 9 | Last hotbar slot that takes part |
 | Enabled on join | off | Turn mixing on automatically when you join a world |
 | Show action bar message | on | Short message above your hotbar when you toggle |
+
+Set the lowest slot above the highest and the two are swapped for you, so the range can never
+end up broken.
 
 The keybind is rebindable under Options, Controls.
 
@@ -123,6 +129,8 @@ that vanilla already sends when you scroll.
 
 - Fabric Loader 0.19.3 or newer
 - Fabric API
-- Cloth Config
-- Mod Menu
+- Cloth Config 19.0.147 or newer
+
+Mod Menu 15.0.2 or newer is optional. It adds the in-game settings screen; without it the mod
+works fine and you configure it by editing `config/mixifyblocks.json`.
 ```
