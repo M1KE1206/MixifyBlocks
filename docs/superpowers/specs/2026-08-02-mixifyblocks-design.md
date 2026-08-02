@@ -26,15 +26,18 @@ verworpen: keybind + ModMenu vereisen de client. Client-side is bevestigd als ge
 
 - De keybind (standaard `N`, herbindbaar via Opties → Besturing) schakelt de modus AAN/UIT.
 - Bij het aanzetten gebeurt er verder niets: er wordt niet meteen van slot gewisseld.
-- De modus is een client-sessie-status. Bij het aanzetten en uitzetten verschijnt een
-  actionbar-melding (zie Feedback).
+- De modus is een client-sessie-status; hij wordt niet opgeslagen. Bij het betreden van een
+  wereld of server wordt hij gezet op de waarde van `enabledOnJoin`; bij het verlaten ervan
+  vervalt hij.
+- Bij het aanzetten en uitzetten verschijnt een actionbar-melding (zie Feedback).
 
 ### De switch
 
 Er wordt van slot gewisseld wanneer aan **alle** volgende voorwaarden is voldaan:
 
 1. De modus staat AAN.
-2. De speler heeft zojuist met succes een block geplaatst.
+2. De speler heeft zojuist met succes een block geplaatst **met de hoofdhand**.
+   Plaatsingen met de offhand tellen niet mee, omdat die losstaan van het hotbar-slot.
 3. Het op dat moment geselecteerde hotbar-slot ligt binnen het ingestelde bereik
    `[minSlot, maxSlot]`.
 
@@ -117,8 +120,14 @@ apart te testen zonder draaiend spel.
 
 **`MultiPlayerGameModeMixin`** — `@Inject` op `RETURN` van
 `MultiPlayerGameMode.useItemOn(...)`. Controleert of het `InteractionResult` een geslaagde
-actie is en of de gebruikte stack een `BlockItem` was; zo ja, zet de vlag op
-`MixifyBlocksClient`. Doet verder geen logica.
+actie is, of de hand de hoofdhand was, en of de gebruikte stack een `BlockItem` was; zo ja,
+zet de vlag op `MixifyBlocksClient`. Doet verder geen logica.
+
+De exacte signatuur van `useItemOn` en de manier waarop een geslaagd `InteractionResult`
+wordt herkend moeten bij aanvang van de implementatie geverifieerd worden tegen de
+gedecompileerde 1.21.7-bronnen. `InteractionResult` is in 1.21.2 omgebouwd van een enum naar
+een sealed interface, dus oudere voorbeelden op internet kloppen niet meer. Dit is de enige
+plek in de mod die van interne Minecraft-API afhangt.
 
 **`MixifyBlocksClient`** — Registreert de keybind, luistert op `END_CLIENT_TICK`, handelt de
 toggle af en voert de uitgestelde switch uit door `SlotPicker` te raadplegen.
