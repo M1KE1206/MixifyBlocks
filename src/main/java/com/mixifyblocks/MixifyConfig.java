@@ -7,8 +7,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Instellingen van de mod. Puur Java plus Gson, zodat dit zonder draaiend spel te testen is.
@@ -59,7 +61,7 @@ public class MixifyConfig {
 					config = read;
 				}
 			} catch (Exception e) {
-				LOGGER.warn("Kon {} niet lezen, standaardwaarden worden gebruikt", path, e);
+				LOGGER.warn("Could not read {}, falling back to default values: {}", path, e.getMessage());
 				config = new MixifyConfig();
 			}
 		}
@@ -74,11 +76,19 @@ public class MixifyConfig {
 			if (parent != null) {
 				Files.createDirectories(parent);
 			}
-			try (Writer writer = Files.newBufferedWriter(path)) {
+			// Write to a sibling temp file first and move it into place, so a failure mid-write
+			// (disk full, permission error, ...) can never leave a truncated config on disk.
+			Path tmp = path.resolveSibling(path.getFileName() + ".tmp");
+			try (Writer writer = Files.newBufferedWriter(tmp)) {
 				GSON.toJson(this, writer);
 			}
+			try {
+				Files.move(tmp, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+			} catch (AtomicMoveNotSupportedException e) {
+				Files.move(tmp, path, StandardCopyOption.REPLACE_EXISTING);
+			}
 		} catch (Exception e) {
-			LOGGER.error("Kon {} niet opslaan", path, e);
+			LOGGER.error("Could not save {}", path, e);
 		}
 	}
 }

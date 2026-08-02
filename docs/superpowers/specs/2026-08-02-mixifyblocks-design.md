@@ -59,9 +59,10 @@ die een plaatsbaar block bevatten.
 
 ### Timing
 
-De switch wordt met één tick uitgesteld: de plaatsingshook zet alleen een vlag, en de
-daadwerkelijke slotwissel gebeurt in de volgende client-tick. Zo wordt de inventory nooit
-gemuteerd terwijl Minecraft midden in de afhandeling van de interactie zit.
+De switch wordt uitgesteld: de plaatsingshook zet alleen een vlag, en de daadwerkelijke
+slotwissel gebeurt aan het eind van diezelfde client-tick, nadat de interactie volledig is
+afgehandeld. Zo wordt de inventory nooit gemuteerd terwijl Minecraft midden in de afhandeling
+van de interactie zit.
 
 Vanilla roept elke tick `ensureHasSentCarriedItem()` aan, wat de slotwijziging naar de
 server stuurt. Er is dus geen eigen packet nodig.
@@ -165,10 +166,14 @@ die in creative niet werkt (blocks worden daar niet verbruikt).
 | Fabric Loader | 0.19.3 | — |
 | Fabric API | 0.129.0+1.21.7 | keybind-registratie, client-tick-events |
 | Cloth Config | `me.shedaniel.cloth:cloth-config-fabric:19.0.147` | configscherm |
-| ModMenu | `com.terraformersmc:modmenu:15.0.2` | ingang naar het configscherm |
+| ModMenu | `com.terraformersmc:modmenu:15.0.2` | ingang naar het configscherm (optioneel) |
 
-Cloth Config en ModMenu zijn verplichte dependencies in `fabric.mod.json`, zodat Fabric een
-nette melding geeft als ze ontbreken in plaats van te crashen.
+Cloth Config is een verplichte dependency in `fabric.mod.json`, zodat Fabric een nette melding
+geeft als hij ontbreekt in plaats van te crashen — het configscherm heeft hem echt nodig.
+ModMenu staat als `recommends`, niet als `depends`: de mod is volledig bruikbaar zonder ModMenu
+(keybind plus het configbestand rechtstreeks bewerken), en het spel mag niet weigeren te
+starten voor spelers die ModMenu niet willen. Zonder ModMenu ontbreekt alleen de ingang naar
+het configscherm.
 
 Build: Java 21, Gradle met `fabric-loom-remap`, `officialMojangMappings()` — gelijk aan de
 bestaande ToggleEnch-mod.

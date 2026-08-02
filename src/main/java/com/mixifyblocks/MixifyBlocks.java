@@ -32,7 +32,16 @@ public class MixifyBlocks implements ClientModInitializer {
 
 	/** Sessie-status: staat het mengen aan? Wordt niet opgeslagen. */
 	private static boolean enabled;
-	/** Er is een block geplaatst; de wissel gebeurt aan het eind van deze tick. */
+	/**
+	 * Er is een block geplaatst; de wissel gebeurt aan het eind van deze tick.
+	 * Bewust een boolean en geen teller: {@code Minecraft.handleKeybinds()} verwerkt
+	 * gebufferde rechtermuisklikken in een onbegrensde while-lus binnen dezelfde tick, dus
+	 * meerdere plaatsingen in één tick smelten samen tot één wissel. Dat is geaccepteerd
+	 * gedrag, geen bug. Eager wisselen binnen {@link #requestSwitch()} zou erger zijn:
+	 * {@code Minecraft.startUseItem()} leest het vastgehouden item opnieuw uit nadat
+	 * {@code useItemOn} teruggekeerd is, dus het slot midden in de interactie muteren
+	 * riskeert plaatsen vanuit het nieuwe slot.
+	 */
 	private static boolean switchPending;
 
 	@Override
@@ -53,6 +62,8 @@ public class MixifyBlocks implements ClientModInitializer {
 		});
 
 		ClientTickEvents.END_CLIENT_TICK.register(MixifyBlocks::onEndClientTick);
+
+		LOGGER.info("MixifyBlocks loaded (slot range {}-{})", config.minSlot, config.maxSlot);
 	}
 
 	private static void onEndClientTick(Minecraft client) {
@@ -61,15 +72,16 @@ public class MixifyBlocks implements ClientModInitializer {
 			announce(client);
 		}
 
-		if (switchPending) {
+		if (enabled && switchPending) {
 			switchPending = false;
 			performSwitch(client);
 		}
 	}
 
 	/**
-	 * Meldt dat er zojuist een block geplaatst is. De wissel zelf wordt een tick uitgesteld
-	 * zodat de inventory niet gemuteerd wordt terwijl de interactie nog afgehandeld wordt.
+	 * Meldt dat er zojuist een block geplaatst is. De wissel zelf gebeurt pas aan het eind
+	 * van dezelfde client-tick, zodat de inventory niet gemuteerd wordt terwijl de interactie
+	 * nog afgehandeld wordt.
 	 */
 	public static void requestSwitch() {
 		if (enabled) {

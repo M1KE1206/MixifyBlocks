@@ -26,5 +26,8 @@ bin/
 # fabric
 run/
 
+# gradle test logs
+logs/
+
 # superpowers scratch
 .superpowers/

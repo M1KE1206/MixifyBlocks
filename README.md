@@ -1,6 +1,6 @@
 # MixifyBlocks
 
-MixifyBlocks is a client-side Fabric mod for Minecraft 1.21.7. Toggle it on, and after every block you place, your hotbar jumps to a random block-holding slot within a range you choose. It turns ordinary building into a constant scramble to keep track of what you're holding.
+MixifyBlocks is a client-side Fabric mod for Minecraft 1.21.7. Toggle it on, and after every block you place, your hotbar jumps to a random block-holding slot within a range you choose. It lets you build naturally mixed walls and floors without scrolling through your hotbar.
 
 ## How it works
 
@@ -16,7 +16,7 @@ The mod works in both survival and creative, in single-player and on any server,
 
 ## Settings
 
-Configure MixifyBlocks through ModMenu (click the gear icon next to the mod in your mods list) or by editing `config/mixifyblocks.json` directly:
+ModMenu is optional. If it's installed, configure MixifyBlocks through it (click the gear icon next to the mod in your mods list). Without ModMenu, edit `config/mixifyblocks.json` directly - the mod is fully usable either way.
 
 | Setting | Default | Description |
 | --- | --- | --- |
@@ -27,13 +27,15 @@ Configure MixifyBlocks through ModMenu (click the gear icon next to the mod in y
 
 If `minSlot` ends up greater than `maxSlot`, the mod swaps them automatically so the range is always valid.
 
+The config file is only read once, at startup. If you hand-edit it while the game is running, your changes take effect after a restart - and if you also have ModMenu installed and save a change through its screen in the meantime, that save overwrites your hand edit.
+
 ## Requirements
 
 - Minecraft 1.21.7
 - Fabric Loader 0.19.3 or newer
 - Fabric API
-- Cloth Config 19.0.147
-- Mod Menu 15.0.2
+- Cloth Config 19.0.147 or newer (required - provides the config screen)
+- Mod Menu 15.0.2 or newer (optional - provides an in-game settings screen; without it, edit the config file directly)
 - Java 21
 
 ## Building from source

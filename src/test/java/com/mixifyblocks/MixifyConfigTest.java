@@ -83,4 +83,13 @@ class MixifyConfigTest {
 		assertEquals(1, loaded.minSlot);
 		assertEquals(9, loaded.maxSlot);
 	}
+
+	@Test
+	void handmatigBewerktBestandMetWaardenBuitenBereikWordtGeklemd(@TempDir Path dir) throws IOException {
+		Path path = dir.resolve("mixifyblocks.json");
+		Files.writeString(path, "{\"minSlot\": 40, \"maxSlot\": -3}");
+		MixifyConfig loaded = MixifyConfig.load(path);
+		assertEquals(1, loaded.minSlot);
+		assertEquals(9, loaded.maxSlot);
+	}
 }
