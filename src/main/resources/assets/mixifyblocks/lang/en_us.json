@@ -1,0 +1,6 @@
+{
+	"key.categories.mixifyblocks": "MixifyBlocks",
+	"key.mixifyblocks.toggle": "Toggle block mixing",
+	"text.mixifyblocks.enabled": "MixifyBlocks: ON (slots %s-%s)",
+	"text.mixifyblocks.disabled": "MixifyBlocks: OFF"
+}

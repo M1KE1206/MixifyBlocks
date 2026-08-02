@@ -1,0 +1,33 @@
+{
+	"schemaVersion": 1,
+	"id": "mixifyblocks",
+	"version": "${version}",
+	"name": "MixifyBlocks",
+	"description": "Automatically shuffles your hotbar between a configurable range of block slots after every block you place.",
+	"authors": [
+		"M1KE1206"
+	],
+	"contact": {
+		"sources": "https://github.com/M1KE1206/MixifyBlocks",
+		"issues": "https://github.com/M1KE1206/MixifyBlocks/issues"
+	},
+	"license": "MIT",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.mixifyblocks.MixifyBlocks"
+		]
+	},
+	"mixins": [
+		{
+			"config": "mixifyblocks.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~1.21.7",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
